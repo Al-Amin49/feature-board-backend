@@ -2,6 +2,7 @@ import express from'express';
 import cors from 'cors'
 import dotenv from 'dotenv'
 import connectDB from './config/db.js';
+import authRouters from './routes/users.routes.js'
 dotenv.config()
 const app = express()
 
@@ -13,6 +14,10 @@ connectDB()
 //middlewares
 app.use(express.json())
 app.use(cors())
+
+//application routes
+
+app.use('/api/v1/users', authRouters)
 
 //health route
 app.get('/', (req, res) => {
