@@ -10,6 +10,7 @@ const register=asyncWrapper(async(req, res)=>{
     res.status(201).json({
         success: true,
         message: "User registered successfully",
+        token: await result.generateToken(),
         data: result,
       });
     
