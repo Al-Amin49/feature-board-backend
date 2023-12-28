@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-
+import bcrypt from 'bcrypt';
 const userSchema= new mongoose.Schema(
     {
     username:{
@@ -28,4 +28,22 @@ const userSchema= new mongoose.Schema(
 
     }, {timestamps:true})
 
-export const User= mongoose.model('User', userSchema)
+
+
+//pre hook middleware for hashing password before saving
+userSchema.pre('save',async function(next){
+    const user=this;
+    if(!user.isModified("password")){
+        next()
+    }
+    try{
+        const saltRound= await bcrypt.genSalt(12);
+        const hash_Password= await bcrypt.hash(user.password, saltRound)
+        user.password=hash_Password
+    }
+    catch(error){
+        next(error.message)
+    }
+})
+
+export const User= mongoose.model('User', userSchema);

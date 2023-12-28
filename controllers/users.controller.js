@@ -14,4 +14,17 @@ const register=asyncWrapper(async(req, res)=>{
       });
     
 })
-export const usersController ={register}
+//@dest     create a new user
+//@route    POST api/v1/users
+//@access  public
+const login=asyncWrapper(async(req, res)=>{
+    const {email, password}=req.body;
+    const result= await User.create({ email, password})
+    res.status(200).json({
+        success: true,
+        message: "User login successfully",
+        data: result,
+      });
+    
+})
+export const usersController ={register, login}
