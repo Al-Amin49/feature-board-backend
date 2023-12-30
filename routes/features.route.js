@@ -9,7 +9,9 @@ router
 
 //update feature
 router.patch('/:id',authMiddleware, featuresController.editFeature);
-
+//search based on title and description
 router.get('/search', featuresController.searchFeatures)
+//Get features with sorting options
+router.get("/sort/:option", featuresController.sortFeatures);
 
 export default router;
