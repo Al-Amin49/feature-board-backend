@@ -3,6 +3,7 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import connectDB from './config/db.js';
 import authRouters from './routes/users.routes.js'
+import featureRouters from './routes/features.route.js'
 dotenv.config()
 const app = express()
 
@@ -18,6 +19,7 @@ app.use(cors())
 //application routes
 
 app.use('/api/v1/users', authRouters)
+app.use('/api/v1/features', featureRouters)
 
 //health route
 app.get('/', (req, res) => {
