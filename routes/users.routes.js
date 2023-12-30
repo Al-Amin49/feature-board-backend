@@ -19,6 +19,6 @@ router
     usersController.login
   );
 
-  router.route('/user').get(authMiddleware, usersController.user)
+  router.route('/user').get(authMiddleware, usersController.userDetails)
 
 export default router;

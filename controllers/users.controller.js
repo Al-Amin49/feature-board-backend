@@ -61,7 +61,7 @@ const login = asyncWrapper(async (req, res) => {
  @route   GET api/v1/users/user
  @access  Private
 */
-const user=async(req, res)=>{
+const userDetails=async(req, res)=>{
   try {
     const userData = req.user;
     console.log(userData);
@@ -72,4 +72,4 @@ const user=async(req, res)=>{
 }
 
 
-export const usersController = { register, login, user };
+export const usersController = { register, login, userDetails };
