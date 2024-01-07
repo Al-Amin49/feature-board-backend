@@ -89,24 +89,26 @@ const deleteFeature = asyncWrapper(async (req, res) => {
 */
 
 const searchFeatures = asyncWrapper(async (req, res) => {
+  console.log('Received request:', req.url);
   const { query } = req.query;
+  // Validate that the 'query' parameter is present
+  if (!query) {
+    return res.status(400).json({ error: "Missing query parameter" });
+  }
   console.log("search result query", query);
-  const searchResults = await Feature.find({
-    $or: [
-      {
-        title: {
-          $regex: new RegExp(query, "i"),
-        },
-      },
-      {
-        description: {
-          $regex: new RegExp(query, "i"),
-        },
-      },
-    ],
-  });
-  console.log("sea", searchResults);
-  res.status(200).json(searchResults);
+  try {
+    const searchResults = await Feature.find({
+      $or: [
+        { title: { $regex: new RegExp(query, 'i') } },
+        { description: { $regex: new RegExp(query, 'i') } },
+      ],
+    });
+    console.log('search', searchResults);
+    res.status(200).json(searchResults);
+  } catch (error) {
+    console.error('Error during search:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
 
 /*-------------------
