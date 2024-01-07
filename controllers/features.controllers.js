@@ -7,33 +7,54 @@ import asyncWrapper from "../utils/asyncWrapper.js";
  @access  Private
 */
 const createFeature = asyncWrapper(async (req, res) => {
-  const { title, description, imageUrl } = req.body;
+  const { title, description } = req.body;
   const userId = req.user._id;
   const newFeature = new Feature({
     title,
     description,
     user: userId,
-    imageUrl,
   });
   const savedFeature = await newFeature.save();
   res.status(201).json(savedFeature);
 });
+
+/*-------------------
+ @desc    Get a single feature by ID
+ @route   GET api/v1/features/:id
+ @access  Public
+*/
+const getFeatureById = asyncWrapper(async (req, res) => {
+  const feature = await Feature.findById(req.params.id);
+
+  if (!feature) {
+    return res.status(404).json({ message: "Feature not found" });
+  }
+
+  res.status(200).json(feature);
+});
+
 /*-------------------
  @desc    Get all features
  @route   GET api/v1/features
  @access  Public
 */
+
 const getAllFeatures = asyncWrapper(async (req, res) => {
   const features = await Feature.find();
   res.status(200).json(features);
 });
 
+/*-------------------
+ @desc    Edit a feature by ID (Authenticated Users Only)
+ @route   Patch api/v1/features/:id
+ @access  Private
+*/
 const editFeature = asyncWrapper(async (req, res) => {
-  const { title, description, imageUrl } = req.body;
+  const { title, description } = req.body;
 
   const updatedFeature = await Feature.findByIdAndUpdate(
     req.params.id,
-    { $set: { title, description, imageUrl } },
+    { $set: { title, description } },
     { new: true }
   );
 
@@ -42,6 +63,23 @@ const editFeature = asyncWrapper(async (req, res) => {
   }
 
   res.status(200).json(updatedFeature);
+});
+
+/*-------------------
+ @desc    Delete a feature by ID (Authenticated Users Only)
+ @route   DELETE api/v1/features/:id
+ @access  Private
+*/
+const deleteFeature = asyncWrapper(async (req, res) => {
+  const { id } = req.params;
+
+  const deletedFeature = await Feature.findByIdAndDelete(id);
+
+  if (!deletedFeature) {
+    return res.status(404).json({ message: "Feature not found" });
+  }
+
+  res.status(200).json({ message: "Feature successfully deleted" });
 });
 
 /*-------------------
@@ -106,6 +144,8 @@ export const featuresController = {
   createFeature,
   getAllFeatures,
   editFeature,
+  getFeatureById,
+  deleteFeature,
   searchFeatures,
   sortFeatures,
 };
