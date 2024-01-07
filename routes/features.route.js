@@ -12,7 +12,7 @@ router.patch('/:id',authMiddleware, featuresController.editFeature);
 //getFeatures by id
 router.get('/:id',authMiddleware, featuresController.getFeatureById);
 //delete feature by id
-router.get('/:id',authMiddleware, featuresController.deleteFeature);
+router.delete('/:id',authMiddleware, featuresController.deleteFeature);
 //search based on title and description
 router.get('/search', featuresController.searchFeatures)
 //Get features with sorting options
