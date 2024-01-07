@@ -24,7 +24,8 @@ const createFeature = asyncWrapper(async (req, res) => {
  @access  Public
 */
 const getFeatureById = asyncWrapper(async (req, res) => {
-  const feature = await Feature.findById(req.params.id);
+  const feature = await Feature.findById(req.params.id)
+    
 
   if (!feature) {
     return res.status(404).json({ message: "Feature not found" });
@@ -142,6 +143,88 @@ const sortFeatures = asyncWrapper(async (req, res) => {
   res.status(200).json(sortedFeatures);
 });
 
+/*-------------------
+ @desc    Vote/Unvote a feature by ID (Authenticated Users Only)
+ @route   POST api/v1/features/:id/vote
+ @access  Private
+*/
+const voteFeature = asyncWrapper(async (req, res) => {
+  const feature = await Feature.findById(req.params.id);
+
+  // Check if the user has already voted
+  const hasVotedIndex = feature.votes.findIndex((vote) => vote.equals(req.user._id));
+
+  if (hasVotedIndex !== -1) {
+    // User has voted, so unvote
+    feature.votes.splice(hasVotedIndex, 1);
+  } else {
+    // User has not voted, so vote
+    feature.votes.push(req.user._id);
+  }
+
+  await feature.save();
+
+  res.status(200).json({ message: "Vote updated successfully" });
+});
+
+/*-------------------
+ @desc    Add a comment to a feature by ID (Authenticated Users Only)
+ @route   POST api/v1/features/:id/comments
+ @access  Private
+*/
+const addComment = asyncWrapper(async (req, res) => {
+  const { text } = req.body;
+  const feature = await Feature.findById(req.params.id);
+
+  const newComment = {
+    user: req.user._id,
+    text,
+    reactions: [],
+  };
+
+  feature.comments.push(newComment);
+  await feature.save();
+
+  res.status(201).json(newComment);
+});
+
+/*-------------------
+ @desc    Edit a comment on a feature by Feature ID and Comment ID (Authenticated Users Only)
+ @route   PUT api/v1/features/:featureId/comments/:commentId
+ @access  Private
+*/
+const editComment = asyncWrapper(async (req, res) => {
+  const { text } = req.body;
+  const feature = await Feature.findById(req.params.featureId);
+
+  const comment = feature.comments.id(req.params.commentId);
+  if (!comment) {
+    return res.status(404).json({ message: "Comment not found" });
+  }
+
+  comment.text = text;
+  await feature.save();
+
+  res.status(200).json(comment);
+});
+
+/*-------------------
+ @desc    Get a comment on a feature by Feature ID and Comment ID
+ @route   GET api/v1/features/:featureId/comments/:commentId
+ @access  Public
+*/
+const getComment = asyncWrapper(async (req, res) => {
+  const feature = await Feature.findById(req.params.featureId);
+
+  const comment = feature.comments.id(req.params.commentId);
+  if (!comment) {
+    return res.status(404).json({ message: "Comment not found" });
+  }
+
+  res.status(200).json(comment);
+});
+
+
 export const featuresController = {
   createFeature,
   getAllFeatures,
@@ -150,4 +233,7 @@ export const featuresController = {
   deleteFeature,
   searchFeatures,
   sortFeatures,
+  voteFeature,
+  addComment,
+  editComment
 };

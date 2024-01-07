@@ -4,7 +4,7 @@ import { featuresController } from "../controllers/features.controllers.js";
 import authMiddleware from "../middlewares/auth.middleware.js";
 
 //search based on title and description
-router.get('/search', featuresController.searchFeatures)
+router.get("/search", featuresController.searchFeatures);
 //getAllFeatures and createFeature wit route chaining
 router
   .route("/")
@@ -12,13 +12,32 @@ router
   .post(authMiddleware, featuresController.createFeature);
 
 //update feature
-router.patch('/:id',authMiddleware, featuresController.editFeature);
+router.patch("/:id", authMiddleware, featuresController.editFeature);
 //getFeatures by id
-router.get('/:id', featuresController.getFeatureById);
+router.get("/:id", featuresController.getFeatureById);
 //delete feature by id
-router.delete('/:id',authMiddleware, featuresController.deleteFeature);
+router.delete("/:id", authMiddleware, featuresController.deleteFeature);
 
 //Get features with sorting options
 router.get("/sort/:option", featuresController.sortFeatures);
+// Add a new route for voting and unvoting
+router.post("/:id/vote", authMiddleware, featuresController.voteFeature);
+//for vote
+router.post(
+  "/api/v1/features/:id/vote",
+  authMiddleware,
+  featuresController.voteFeature
+);
+// Private Route (require authentication) for comments
+router.post(
+  "/api/v1/features/:id/comments",
+  authMiddleware,
+  featuresController.addComment
+);
+router.patch(
+  "/api/v1/features/:id/comments/:commentId",
+  authMiddleware,
+  featuresController.editComment
+);
 
 export default router;
