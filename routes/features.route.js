@@ -14,7 +14,7 @@ router
 //update feature
 router.patch('/:id',authMiddleware, featuresController.editFeature);
 //getFeatures by id
-router.get('/:id',authMiddleware, featuresController.getFeatureById);
+router.get('/:id', featuresController.getFeatureById);
 //delete feature by id
 router.delete('/:id',authMiddleware, featuresController.deleteFeature);
 

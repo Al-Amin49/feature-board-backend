@@ -46,5 +46,7 @@ const featureSchema = new mongoose.Schema({
   imageUrl: {
     type: String,
   },
-});
+},
+{ timestamps: true }
+);
 export const Feature = mongoose.model("Feature", featureSchema);
