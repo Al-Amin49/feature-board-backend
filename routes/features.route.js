@@ -22,20 +22,15 @@ router.delete("/:id", authMiddleware, featuresController.deleteFeature);
 router.get("/sort/:option", featuresController.sortFeatures);
 // Add a new route for voting and unvoting
 router.post("/:id/vote", authMiddleware, featuresController.voteFeature);
-//for vote
-router.post(
-  "/api/v1/features/:id/vote",
-  authMiddleware,
-  featuresController.voteFeature
-);
+
 // Private Route (require authentication) for comments
 router.post(
-  "/api/v1/features/:id/comments",
+  "/:id/comments",
   authMiddleware,
   featuresController.addComment
 );
 router.patch(
-  "/api/v1/features/:id/comments/:commentId",
+  "/:id/comments/:commentId",
   authMiddleware,
   featuresController.editComment
 );
