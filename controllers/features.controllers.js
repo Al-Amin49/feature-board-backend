@@ -164,7 +164,10 @@ const voteFeature = asyncWrapper(async (req, res) => {
 
   await feature.save();
 
-  res.status(200).json({ message: "Vote updated successfully" });
+  // Fetch the updated feature after voting
+  const updatedFeature = await Feature.findById(req.params.id);
+
+  res.status(200).json({ message: "Vote updated successfully", feature: updatedFeature });
 });
 
 /*-------------------
