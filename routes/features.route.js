@@ -22,6 +22,8 @@ router.delete("/:id", authMiddleware, featuresController.deleteFeature);
 router.get("/sort/:option", featuresController.sortFeatures);
 // Add a new route for voting and unvoting
 router.post("/:id/vote", authMiddleware, featuresController.voteFeature);
+router.get("/:id/vote", featuresController.getAllVoters);
+
 
 // Private Route (require authentication) for comments
 router.post(

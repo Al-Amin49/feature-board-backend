@@ -171,6 +171,30 @@ const voteFeature = asyncWrapper(async (req, res) => {
 });
 
 /*-------------------
+ @desc    Get all voters for a feature by ID with usernames
+ @route   GET api/v1/features/:id/voters
+ @access  Public
+*/
+const getAllVoters = asyncWrapper(async (req, res) => {
+  const feature = await Feature.findById(req.params.id)
+    .populate('votes', 'username'); 
+
+  // Check if the feature exists
+  if (!feature) {
+    return res.status(404).json({ message: 'Feature not found' });
+  }
+
+  const voters = feature.votes.map((user) => ({
+    _id: user._id,
+    username: user.username,
+  }));
+
+  res.status(200).json(voters);
+});
+
+
+
+/*-------------------
  @desc    Add a comment to a feature by ID (Authenticated Users Only)
  @route   POST api/v1/features/:id/comments
  @access  Private
@@ -256,5 +280,6 @@ export const featuresController = {
   voteFeature,
   addComment,
   getAllComments,
-  editComment
+  editComment,
+  getAllVoters
 };
