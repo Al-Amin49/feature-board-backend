@@ -29,6 +29,11 @@ router.post(
   authMiddleware,
   featuresController.addComment
 );
+//get all comments
+router.get(
+  "/:id/comments",
+  featuresController.getAllComments
+);
 router.patch(
   "/:id/comments/:commentId",
   authMiddleware,

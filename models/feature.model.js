@@ -20,15 +20,16 @@ const featureSchema = new mongoose.Schema({
       ref: "User",
     },
   ],
+ 
   comments: [
     {
-      user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
       text: { type: String, required: true },
       reactions: [
         {
           user: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
+            ref: 'User',
             required: true,
           },
           type: {

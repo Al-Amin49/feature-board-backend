@@ -1,6 +1,6 @@
 import { Feature } from "../models/feature.model.js";
 import asyncWrapper from "../utils/asyncWrapper.js";
-
+import mongoose from 'mongoose'
 /*-------------------
  @desc    Create a new feature
  @route   POST api/v1/features
@@ -189,40 +189,57 @@ const addComment = asyncWrapper(async (req, res) => {
 });
 
 /*-------------------
+ @desc    Get all comments for a feature by ID
+ @route   GET api/v1/features/:id/comments
+ @access  Public
+*/
+const getAllComments = asyncWrapper(async (req, res) => {
+  const feature = await Feature.findById(req.params.id);
+
+  // Check if the feature exists
+  if (!feature) {
+    return res.status(404).json({ message: 'Feature not found' });
+  }
+
+  const comments = feature.comments;
+
+  res.status(200).json(comments);
+});
+
+/*-------------------
  @desc    Edit a comment on a feature by Feature ID and Comment ID (Authenticated Users Only)
  @route   PUT api/v1/features/:featureId/comments/:commentId
  @access  Private
 */
+// Edit a comment
 const editComment = asyncWrapper(async (req, res) => {
   const { text } = req.body;
-  const feature = await Feature.findById(req.params.featureId);
+  const { id } = req.params;
 
-  const comment = feature.comments.id(req.params.commentId);
-  if (!comment) {
-    return res.status(404).json({ message: "Comment not found" });
+  try {
+    const updatedFeature = await Feature.findOneAndUpdate(
+      { 'comments._id': new mongoose.Types.ObjectId(id) }, // Add 'new' here
+      { $set: { 'comments.$.text': text } },
+      { new: true }
+    );
+
+    // Check if the feature was found and updated
+    if (!updatedFeature) {
+      return res.status(404).json({ message: 'Comment not found' });
+    }
+
+    // Find the updated comment by ID
+    const updatedComment = updatedFeature.comments.find(comment => comment._id.toString() === id.toString());
+
+    // Respond with the updated comment
+    res.status(200).json(updatedComment);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
-
-  comment.text = text;
-  await feature.save();
-
-  res.status(200).json(comment);
 });
 
-/*-------------------
- @desc    Get a comment on a feature by Feature ID and Comment ID
- @route   GET api/v1/features/:featureId/comments/:commentId
- @access  Public
-*/
-const getComment = asyncWrapper(async (req, res) => {
-  const feature = await Feature.findById(req.params.featureId);
 
-  const comment = feature.comments.id(req.params.commentId);
-  if (!comment) {
-    return res.status(404).json({ message: "Comment not found" });
-  }
-
-  res.status(200).json(comment);
-});
 
 
 export const featuresController = {
@@ -235,5 +252,6 @@ export const featuresController = {
   sortFeatures,
   voteFeature,
   addComment,
+  getAllComments,
   editComment
 };
