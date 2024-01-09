@@ -41,9 +41,31 @@ const getFeatureById = asyncWrapper(async (req, res) => {
 */
 
 const getAllFeatures = asyncWrapper(async (req, res) => {
-  const features = await Feature.find();
-  res.status(200).json(features);
+  const currentPage = parseInt(req.query.page) || 1; 
+  const featuresPerPage = 5;
+
+  // Calculate skip value to skip the appropriate number of features based on the page
+  const skip = (currentPage - 1) * featuresPerPage;
+
+  // Query features with pagination
+  const features = await Feature.find()
+    .skip(skip)
+    .limit(featuresPerPage);
+
+  // Count total number of features
+  const totalFeatures = await Feature.countDocuments();
+
+  // Calculate total number of pages
+  const totalPages = Math.ceil(totalFeatures / featuresPerPage);
+
+  res.status(200).json(features, totalPages, currentPage);
 });
+
+
+// const getAllFeatures = asyncWrapper(async (req, res) => {
+//   const features = await Feature.find();
+//   res.status(200).json(features);
+// });
 
 /*-------------------
  @desc    Edit a feature by ID (Authenticated Users Only)
