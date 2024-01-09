@@ -18,8 +18,7 @@ router.get("/:id", featuresController.getFeatureById);
 //delete feature by id
 router.delete("/:id", authMiddleware, featuresController.deleteFeature);
 
-//Get features with sorting options
-router.get("/sort/:option", featuresController.sortFeatures);
+
 // Add a new route for voting and unvoting
 router.post("/:id/vote", authMiddleware, featuresController.voteFeature);
 router.get("/:id/vote", featuresController.getAllVoters);

@@ -112,36 +112,7 @@ const searchFeatures = asyncWrapper(async (req, res) => {
   }
 });
 
-/*-------------------
- @desc    Get features with sorting options
-@route   GET api/v1/features/sort/:option
- @access  Public
-*/
-const sortFeatures = asyncWrapper(async (req, res) => {
-  const { option } = req.params;
-  let sortQuery = {};
-  switch (option) {
-    case "votes":
-      sortQuery = { votes: -1 }; // Sort by number of votes in descending order
-      break;
 
-    case "comments":
-      sortQuery = { "comments.length": -1 };
-      break;
-    case "new":
-      sortQuery = { createdAt: -1 };
-      break;
-    case "top":
-      // Combine votes and comments for top sorting
-      sortQuery = { votes: -1, "comments.length": -1 };
-      break;
-    default:
-      break;
-  }
-  const sortedFeatures = await Feature.find().sort(sortQuery);
-
-  res.status(200).json(sortedFeatures);
-});
 
 /*-------------------
  @desc    Vote/Unvote a feature by ID (Authenticated Users Only)
@@ -276,7 +247,6 @@ export const featuresController = {
   getFeatureById,
   deleteFeature,
   searchFeatures,
-  sortFeatures,
   voteFeature,
   addComment,
   getAllComments,
