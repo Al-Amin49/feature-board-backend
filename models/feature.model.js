@@ -15,10 +15,12 @@ const featureSchema = new mongoose.Schema({
     required: true,
   },
   votes: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
+   {
+    user: {
+       type: mongoose.Schema.Types.ObjectId, 
+       ref: 'User' 
+      }
+   }
   ],
  
   comments: [

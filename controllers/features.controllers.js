@@ -171,21 +171,25 @@ const voteFeature = asyncWrapper(async (req, res) => {
  @access  Public
 */
 const getAllVoters = asyncWrapper(async (req, res) => {
-  Feature.findById(req.params.id)
-    .populate('votes.user', 'username' )
-    .then((feature) => {
-      // Check if the feature exists
-      if (!feature) {
-        return res.status(404).json({ message: 'Feature not found' });
-      }
+  try {
+    const feature = await Feature.findById(req.params.id).populate('votes.user', 'username');
 
-      const votes = feature.votes;
-      res.status(200).json(votes);
-    })
-    .catch((error) => {
-      console.error(error);
-      res.status(500).json({ message: 'Internal Server Error' });
-    });
+    // Check if the feature exists
+    if (!feature) {
+      return res.status(404).json({ message: 'Feature not found' });
+    }
+
+    // Extracting the username from the populated votes
+    const votesWithUsername = feature.votes.map((vote) => ({
+      _id: vote._id,
+      username: vote.user ? vote.user.username : null, // Check if user exists before accessing username
+    }));
+
+    res.status(200).json(votesWithUsername);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
 });
 
 
