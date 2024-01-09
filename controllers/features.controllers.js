@@ -54,11 +54,13 @@ const getAllFeatures = asyncWrapper(async (req, res) => {
 
   // Count total number of features
   const totalFeatures = await Feature.countDocuments();
+  console.log('total features', totalFeatures)
 
   // Calculate total number of pages
   const totalPages = Math.ceil(totalFeatures / featuresPerPage);
+  console.log('total pages',totalPages)
 
-  res.status(200).json(features, totalPages, currentPage);
+  res.status(200).json({features, totalPages, currentPage});
 });
 
 
@@ -169,20 +171,21 @@ const voteFeature = asyncWrapper(async (req, res) => {
  @access  Public
 */
 const getAllVoters = asyncWrapper(async (req, res) => {
-  const feature = await Feature.findById(req.params.id)
-    .populate('votes', 'username'); 
+  Feature.findById(req.params.id)
+    .populate('votes.user', 'username' )
+    .then((feature) => {
+      // Check if the feature exists
+      if (!feature) {
+        return res.status(404).json({ message: 'Feature not found' });
+      }
 
-  // Check if the feature exists
-  if (!feature) {
-    return res.status(404).json({ message: 'Feature not found' });
-  }
-
-  const voters = feature.votes.map((user) => ({
-    _id: user._id,
-    username: user.username,
-  }));
-
-  res.status(200).json(voters);
+      const votes = feature.votes;
+      res.status(200).json(votes);
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).json({ message: 'Internal Server Error' });
+    });
 });
 
 
@@ -213,18 +216,26 @@ const addComment = asyncWrapper(async (req, res) => {
  @route   GET api/v1/features/:id/comments
  @access  Public
 */
-const getAllComments = asyncWrapper(async (req, res) => {
-  const feature = await Feature.findById(req.params.id);
 
-  // Check if the feature exists
-  if (!feature) {
-    return res.status(404).json({ message: 'Feature not found' });
-  }
+const getAllComments = (req, res) => {
+  Feature.findById(req.params.id)
+    .populate('comments.user', 'username' )
+    .then((feature) => {
+      // Check if the feature exists
+      if (!feature) {
+        return res.status(404).json({ message: 'Feature not found' });
+      }
 
-  const comments = feature.comments;
+      const comments = feature.comments;
+      res.status(200).json(comments);
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).json({ message: 'Internal Server Error' });
+    });
+};
 
-  res.status(200).json(comments);
-});
+
 
 /*-------------------
  @desc    Edit a comment on a feature by Feature ID and Comment ID (Authenticated Users Only)
