@@ -54,11 +54,11 @@ const getAllFeatures = asyncWrapper(async (req, res) => {
 
   // Count total number of features
   const totalFeatures = await Feature.countDocuments();
-  console.log('total features', totalFeatures)
+  
 
   // Calculate total number of pages
   const totalPages = Math.ceil(totalFeatures / featuresPerPage);
-  console.log('total pages',totalPages)
+ 
 
   res.status(200).json({features, totalPages, currentPage});
 });
@@ -222,6 +222,11 @@ const addComment = asyncWrapper(async (req, res) => {
 */
 
 const getAllComments = (req, res) => {
+    // Validate if the ID is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: 'Invalid feature ID' });
+      console.log('invalid object id')
+    }
   Feature.findById(req.params.id)
     .populate('comments.user', 'username' )
     .then((feature) => {
@@ -231,6 +236,7 @@ const getAllComments = (req, res) => {
       }
 
       const comments = feature.comments;
+      console.log('comments', comments)
       res.status(200).json(comments);
     })
     .catch((error) => {
