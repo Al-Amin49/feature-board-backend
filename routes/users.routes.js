@@ -3,6 +3,7 @@ import { usersController } from "../controllers/users.controller.js";
 import zodValidateMiddleware from "../middlewares/zodValidate.middleware.js";
 import { zodAuthValidationSchema } from "../validator/zodAuth.validator.js";
 import authMiddleware from "../middlewares/auth.middleware.js";
+import adminMiddleware from "../middlewares/admin.middlware.js";
 
 const router = express.Router();
 
@@ -20,5 +21,6 @@ router
   );
 
   router.route('/user').get(authMiddleware, usersController.userDetails)
+  router.route('/allusers').get(authMiddleware, adminMiddleware, usersController.getAllUsers)
 
 export default router;
