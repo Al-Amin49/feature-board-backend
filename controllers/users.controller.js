@@ -107,6 +107,23 @@ const deleteUser = asyncWrapper(async (req, res) => {
   res.status(200).json({ message: "user successfully deleted" });
 });
 
+const makeAdmin = asyncWrapper(async (req, res) => {
+  const { id } = req.params;
+
+  // Update the user's role to "admin" using $set
+  const updatedUser = await User.findByIdAndUpdate(
+    id,
+    { $set: { role: "admin" } },
+    { new: true } // Return the updated document
+  );
+
+  if (!updatedUser) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  // Return the updated user
+  res.status(200).json({ message: "User role updated to admin", user: updatedUser });
+});
 
 
 export const usersController = {
@@ -114,5 +131,6 @@ export const usersController = {
   login,
   userDetails,
   getAllUsers,
-  deleteUser
+  deleteUser,
+  makeAdmin
 };
