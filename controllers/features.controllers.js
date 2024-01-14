@@ -210,7 +210,7 @@ const getAllVoters = asyncWrapper(async (req, res) => {
     res.status(200).json(votesWithUsername);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    res.status(500).json({ message: 'Internal Server Error' });0
   }
 });
 
