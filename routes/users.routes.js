@@ -22,5 +22,6 @@ router
 
   router.route('/user').get(authMiddleware, usersController.userDetails)
   router.route('/allusers').get(authMiddleware, adminMiddleware, usersController.getAllUsers)
+  router.delete("/:id", authMiddleware, adminMiddleware, usersController.deleteUser )
 
 export default router;

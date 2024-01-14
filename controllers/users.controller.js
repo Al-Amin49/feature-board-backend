@@ -94,19 +94,25 @@ const userDetails=asyncWrapper(async(req, res)=>{
   // Sending the response with user details
   res.status(200).json({ user: userDetails });
 })
-// const userDetails = async (req, res) => {
-//   try {
-//     const userData = req.user;
-//     console.log(userData);
-//     return res.status(200).json({ userData });
-//   } catch (error) {
-//     console.log(` error from user route ${error}`);
-//   }
-// };
+
+const deleteUser = asyncWrapper(async (req, res) => {
+  const { id } = req.params;
+
+  const deletedUser = await User.findByIdAndDelete(id);
+
+  if (!deletedUser) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  res.status(200).json({ message: "user successfully deleted" });
+});
+
+
 
 export const usersController = {
   register,
   login,
   userDetails,
   getAllUsers,
+  deleteUser
 };
