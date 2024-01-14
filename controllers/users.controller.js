@@ -76,15 +76,33 @@ const getAllUsers = asyncWrapper(async (req, res) => {
  @route   GET api/v1/users/user
  @access  Private
 */
-const userDetails = async (req, res) => {
-  try {
-    const userData = req.user;
-    console.log(userData);
-    return res.status(200).json({ userData });
-  } catch (error) {
-    console.log(` error from user route ${error}`);
+const userDetails=asyncWrapper(async(req, res)=>{
+  const user = req.user;
+  console.log('Authenticated User:', user)
+  // If no user is found
+  if (!user) {
+    return res.status(404).json({ message: 'User not found' });
   }
-};
+
+  const userDetails = {
+    _id: user._id,
+    username: user.username,
+    email: user.email,
+    role:user.role
+  };
+
+  // Sending the response with user details
+  res.status(200).json({ user: userDetails });
+})
+// const userDetails = async (req, res) => {
+//   try {
+//     const userData = req.user;
+//     console.log(userData);
+//     return res.status(200).json({ userData });
+//   } catch (error) {
+//     console.log(` error from user route ${error}`);
+//   }
+// };
 
 export const usersController = {
   register,

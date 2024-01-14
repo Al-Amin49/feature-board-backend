@@ -64,11 +64,6 @@ const getAllFeatures = asyncWrapper(async (req, res) => {
 });
 
 
-// const getAllFeatures = asyncWrapper(async (req, res) => {
-//   const features = await Feature.find();
-//   res.status(200).json(features);
-// });
-
 /*-------------------
  @desc    Edit a feature by ID (Authenticated Users Only)
  @route   Patch api/v1/features/:id
@@ -165,27 +160,7 @@ const voteFeature = asyncWrapper(async (req, res) => {
 
   res.status(200).json({ message: "Vote updated successfully", feature: updatedFeature });
 });
-// const voteFeature = asyncWrapper(async (req, res) => {
-//   const feature = await Feature.findById(req.params.id);
 
-//   // Check if the user has already voted
-//   const hasVotedIndex = feature.votes.findIndex((vote) => vote.equals(req.user._id));
-
-//   if (hasVotedIndex !== -1) {
-//     // User has voted, so unvote
-//     feature.votes.splice(hasVotedIndex, 1);
-//   } else {
-//     // User has not voted, so vote
-//     feature.votes.push(req.user._id);
-//   }
-
-//   await feature.save();
-
-//   // Fetch the updated feature after voting
-//   const updatedFeature = await Feature.findById(req.params.id);
-
-//   res.status(200).json({ message: "Vote updated successfully", feature: updatedFeature });
-// });
 
 /*-------------------
  @desc    Get all voters for a feature by ID with usernames
