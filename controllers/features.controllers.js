@@ -309,7 +309,38 @@ const getTotalVotesCount = asyncWrapper(async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
+/*-------------------
+ @desc    Get total count of comments for all features
+ @route   GET api/v1/features/comments/count
+ @access  Public
+*/
 
+const getTotalCommentsCount = asyncWrapper(async (req, res) => {
+  try {
+    // Aggregate the total count of comments across all features
+    const totalCommentsCount = await Feature.aggregate([
+      {
+        $project: {
+          commentsCount: { $size: "$comments" } // Count the number of comments for each feature
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalComments: { $sum: "$commentsCount" } // Sum up the commentsCount for all features
+        }
+      }
+    ]);
+
+    // Extract the totalComments count from the result
+    const totalCount = totalCommentsCount.length > 0 ? totalCommentsCount[0].totalComments : 0;
+
+    res.status(200).json({ totalCount });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
 
 export const featuresController = {
   createFeature,
@@ -323,5 +354,6 @@ export const featuresController = {
   getAllComments,
   editComment,
   getAllVoters,
-  getTotalVotesCount
+  getTotalVotesCount,
+  getTotalCommentsCount
 };

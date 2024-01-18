@@ -42,5 +42,7 @@ router.patch(
 );
 //getTotalvoteCount
 router.get('/votes/count', authMiddleware, featuresController.getTotalVotesCount )
+//getTotalCOmments count
+router.get('/comments/count', authMiddleware, featuresController.getTotalCommentsCount )
 
 export default router;
