@@ -40,5 +40,7 @@ router.patch(
   authMiddleware,
   featuresController.editComment
 );
+//getTotalvoteCount
+router.get('/votes/count', authMiddleware, featuresController.getTotalVotesCount )
 
 export default router;
