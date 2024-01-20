@@ -139,7 +139,7 @@ const searchFeatures = asyncWrapper(async (req, res) => {
 */
 
 const voteFeature = asyncWrapper(async (req, res) => {
-  const feature = await Feature.findById(req.params.id);
+  const feature = await Feature.findById(req.params.id)
 
   // Check if the user has already voted
   const hasVotedIndex = feature.votes.findIndex((vote) => vote.equals(req.user._id));
@@ -155,7 +155,7 @@ const voteFeature = asyncWrapper(async (req, res) => {
   await feature.save();
 
   // Fetch the updated feature after voting and populate the votes.user field
-  const updatedFeature = await Feature.findById(req.params.id).populate('votes.user', 'username');
+  const updatedFeature = await Feature.findById(req.params.id).populate('user', 'username');
 
   res.status(200).json({ message: "Vote updated successfully", feature: updatedFeature });
 });
@@ -168,23 +168,38 @@ const voteFeature = asyncWrapper(async (req, res) => {
 */
 const getAllVoters = asyncWrapper(async (req, res) => {
   try {
-    const feature = await Feature.findById(req.params.id).populate('votes.user', 'username');
+    const feature = await Feature.findById(req.params.id)
+    .populate('user', 'username')
+    .populate({
+      path: 'votes',
+      populate: { path: 'user', select: 'username' }
+    });
+      console.log('Populated Feature:', feature);
 
     // Check if the feature exists
     if (!feature) {
       return res.status(404).json({ message: 'Feature not found' });
     }
 
-    // Extracting the username from the populated votes
-    const votesWithUsername = feature.votes.map((vote) => ({
-      _id: vote._id,
-      username: vote.user ? vote.user.username : null, // Check if user exists before accessing username
-    }));
+      // Extracting the username from the populated votes
+      const votesWithUsername = feature.votes.map((vote) => {
+        const username = vote.user ? vote.user.username : null;
+      
+        console.log('Vote:', vote);
+        console.log('User:', vote.user);
+        console.log('Username:', username);
+      
+        return {
+          _id: vote._id,
+          username: username,
+        };
+      });
+        console.log('Votes with Username:', votesWithUsername);
 
     res.status(200).json(votesWithUsername);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Internal Server Error' });0
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 });
 
@@ -224,7 +239,7 @@ const getAllComments = (req, res) => {
       console.log('invalid object id')
     }
   Feature.findById(req.params.id)
-    .populate('comments.user', 'username' )
+    .populate('user', 'username' )
     .then((feature) => {
       // Check if the feature exists
       if (!feature) {

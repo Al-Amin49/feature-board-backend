@@ -44,6 +44,7 @@ const featureSchema = new mongoose.Schema({
   ],
   status: {
     type: String,
+    enum:['Under Review', 'Planned', 'Complete', 'In progress'],
     default: "New",
   },
   imageUrl: {
