@@ -25,6 +25,7 @@ const createFeature = asyncWrapper(async (req, res) => {
 */
 const getFeatureById = asyncWrapper(async (req, res) => {
   const feature = await Feature.findById(req.params.id)
+  .populate('user', 'username')
     
 
   if (!feature) {
@@ -41,28 +42,26 @@ const getFeatureById = asyncWrapper(async (req, res) => {
 */
 
 const getAllFeatures = asyncWrapper(async (req, res) => {
-  const currentPage = parseInt(req.query.page) || 1; 
+  const currentPage = parseInt(req.query.page) || 1;
   const featuresPerPage = 5;
 
   // Calculate skip value to skip the appropriate number of features based on the page
   const skip = (currentPage - 1) * featuresPerPage;
 
-  // Query features with pagination
+  // Query features with pagination, use populate to retrieve user details
   const features = await Feature.find()
     .skip(skip)
-    .limit(featuresPerPage);
+    .limit(featuresPerPage)
+    .populate('user', 'username _id'); // Populate the 'user' field with 'username'
 
   // Count total number of features
   const totalFeatures = await Feature.countDocuments();
-  
 
   // Calculate total number of pages
   const totalPages = Math.ceil(totalFeatures / featuresPerPage);
- 
 
-  res.status(200).json({features, totalPages, currentPage});
+  res.status(200).json({ features, totalPages, currentPage });
 });
-
 
 /*-------------------
  @desc    Edit a feature by ID (Authenticated Users Only)
