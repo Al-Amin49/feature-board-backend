@@ -3,6 +3,7 @@ const router = express.Router();
 import { featuresController } from "../controllers/features.controllers.js";
 import authMiddleware from "../middlewares/auth.middleware.js";
 import featureWithVotes from "../utils/getFeatureWIthVotes.js";
+import adminMiddleware from "../middlewares/admin.middlware.js";
 
 //search based on title and description
 router.get("/search", featuresController.searchFeatures);
@@ -46,5 +47,7 @@ router.get('/votes/count', authMiddleware, featuresController.getTotalVotesCount
 //getTotalCOmments count
 router.get('/comments/count', authMiddleware, featuresController.getTotalCommentsCount )
 router.get('/votes', featureWithVotes);
+//update status
+router.put("/:id", authMiddleware, adminMiddleware, featuresController.updateStatus)
 
 export default router;
