@@ -212,7 +212,7 @@ const getAllVoters = asyncWrapper(async (req, res) => {
 */
 const addComment = asyncWrapper(async (req, res) => {
   const { text } = req.body;
-  const feature = await Feature.findById(req.params.id);
+  const feature = await Feature.findById(req.params.id)
 
   const newComment = {
     user: req.user._id,
