@@ -1,56 +1,69 @@
 import mongoose from "mongoose";
 
-const featureSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true,
-  },
-  description: {
-    type: String,
-    required: true,
-  },
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
-  votes: [
-   {
-    user: {
-       type: mongoose.Schema.Types.ObjectId, 
-       ref: 'User'
-      }
-   }
-  ],
- 
-  comments: [
-    {
-      user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-      text: { type: String, required: true },
-      reactions: [
-        {
-          user: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User',
-            required: true,
-          },
-          type: {
-            type: String,
-            required: true,
-          },
-        },
-      ],
+const featureSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: true,
     },
-  ],
-  status: {
-    type: String,
-    enum:['Under Review', 'Planned', 'Complete', 'In progress', 'New', 'Active', 'Inactive', 'Archived'],
-    default: "New",
+    description: {
+      type: String,
+      required: true,
+    },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    votes: [
+      {
+        user: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+      },
+    ],
+
+    comments: [
+      {
+        user: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+        text: { type: String, required: true },
+        reactions: [
+          {
+            user: {
+              type: mongoose.Schema.Types.ObjectId,
+              ref: "User",
+              required: true,
+            },
+            type: {
+              type: String,
+              required: true,
+            },
+          },
+        ],
+      },
+    ],
+    status: {
+      type: String,
+      enum: [
+        "Under Review",
+        "Planned",
+        "Complete",
+        "In progress",
+        "New",
+        "Active",
+        "Inactive",
+        "Archived",
+      ],
+      default: "New",
+    },
+    imageUrl: {
+      type: String,
+    },
   },
-  imageUrl: {
-    type: String,
-  },
-},
-{ timestamps: true }
+  { timestamps: true }
 );
 export const Feature = mongoose.model("Feature", featureSchema);

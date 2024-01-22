@@ -24,10 +24,13 @@ const createFeature = asyncWrapper(async (req, res) => {
  @access  Public
 */
 const getFeatureById = asyncWrapper(async (req, res) => {
-  const feature = await Feature.findById(req.params.id).populate(
-    "user",
-    "username"
-  );
+  const feature = await Feature.findById(req.params.id).populate({
+    path: "user",
+    select: "username",
+  }).populate({
+    path: "comments.user",
+    select: "username profile",
+  });
 
   if (!feature) {
     return res.status(404).json({ message: "Feature not found" });
@@ -53,7 +56,8 @@ const getAllFeatures = asyncWrapper(async (req, res) => {
   const features = await Feature.find()
     .skip(skip)
     .limit(featuresPerPage)
-    .populate("user", "username _id"); // Populate the 'user' field with 'username'
+    .populate("user", "username _id"); 
+    
 
   // Count total number of features
   const totalFeatures = await Feature.countDocuments();
@@ -64,6 +68,10 @@ const getAllFeatures = asyncWrapper(async (req, res) => {
   res.status(200).json({ features, totalPages, currentPage });
 });
 
+ const getAllFeaturesForHome=asyncWrapper(async(req, res)=>{
+  const features = await Feature.find();
+  res.status(200).json({ features });
+})
 /*-------------------
  @desc    Edit a feature by ID (Authenticated Users Only)
  @route   Patch api/v1/features/:id
@@ -215,18 +223,31 @@ const getAllVoters = asyncWrapper(async (req, res) => {
 */
 const addComment = asyncWrapper(async (req, res) => {
   const { text } = req.body;
-  const feature = await Feature.findById(req.params.id);
+  const feature = await Feature.findById(req.params.id).populate({
+    path: "comments.user",
+    select: "profile username",
+  });
 
-  const newComment = {
-    user: req.user._id,
-    text,
-    reactions: [],
-  };
+  // Check if req.user is available and contains the necessary information
+  if (req.user && req.user._id && req.user.username && req.user.profile) {
+    const newComment = {
+      user: {
+        _id: req.user._id,
+        username: req.user.username,
+        profile: req.user.profile,
+      },
+      text,
+      reactions: [],
+    };
 
-  feature.comments.push(newComment);
-  await feature.save();
+    feature.comments.push(newComment);
+    await feature.save();
 
-  res.status(201).json(newComment);
+    res.status(201).json(newComment);
+  } else {
+    // Handle the case where req.user information is incomplete
+    res.status(400).json({ message: "Incomplete user information" });
+  }
 });
 
 /*-------------------
@@ -242,7 +263,10 @@ const getAllComments = (req, res) => {
     console.log("invalid object id");
   }
   Feature.findById(req.params.id)
-    .populate("user", "username")
+    .populate({
+      path: "comments.user",
+      select: "profile username",
+    })
     .then((feature) => {
       // Check if the feature exists
       if (!feature) {
@@ -267,23 +291,23 @@ const getAllComments = (req, res) => {
 // Edit a comment
 const editComment = asyncWrapper(async (req, res) => {
   const { text } = req.body;
-  const { id } = req.params;
+  const { featureId, commentId } = req.params;
 
   try {
     const updatedFeature = await Feature.findOneAndUpdate(
-      { "comments._id": new mongoose.Types.ObjectId(id) }, // Add 'new' here
+      { _id: featureId, "comments._id": commentId },
       { $set: { "comments.$.text": text } },
       { new: true }
     );
 
     // Check if the feature was found and updated
     if (!updatedFeature) {
-      return res.status(404).json({ message: "Comment not found" });
+      return res.status(404).json({ message: "Feature or Comment not found" });
     }
 
     // Find the updated comment by ID
     const updatedComment = updatedFeature.comments.find(
-      (comment) => comment._id.toString() === id.toString()
+      (comment) => comment._id.toString() === commentId
     );
 
     // Respond with the updated comment
@@ -294,6 +318,34 @@ const editComment = asyncWrapper(async (req, res) => {
   }
 });
 
+/*-------------------
+ @desc    Delete a comment on a feature by Feature ID and Comment ID (Authenticated Users Only)
+ @route   DELETE api/v1/features/:featureId/comments/:commentId
+ @access  Private
+*/
+// Delete a comment
+const deleteComment = asyncWrapper(async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const updatedFeature = await Feature.findOneAndUpdate(
+      { "comments._id": new mongoose.Types.ObjectId(id) },
+      { $pull: { comments: { _id: new mongoose.Types.ObjectId(id) } } },
+      { new: true }
+    );
+
+    // Check if the feature was found and updated
+    if (!updatedFeature) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
+
+    // Respond with success message or any additional data as needed
+    res.status(200).json({ message: "Comment deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
 /*-------------------
  @desc    Get total count of votes for all features
  @route   GET api/v1/features/votes/count
@@ -395,9 +447,51 @@ const updateStatus = asyncWrapper(async (req, res) => {
   res.json(feature);
 });
 
+/*-------------------
+ @desc    Get feature data with votes by ID
+ @route   GET api/v1/features/:id/feature-with-votes
+ @access  Public
+*/
+
+const getFeatureWithVotes = (req, res) => {
+  // Validate if the ID is a valid ObjectId
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).json({ message: "Invalid feature ID" });
+  }
+
+  Feature.findById(req.params.id)
+    .populate({
+      path: "votes.user",
+      select: "profile username",
+    })
+    .then((feature) => {
+      // Check if the feature exists
+      if (!feature) {
+        return res.status(404).json({ message: "Feature not found" });
+      }
+
+      // Calculate the total number of votes for the feature
+      const totalVotes = feature.votes.length;
+
+      const featureWithVotesData = {
+       
+        data: {
+          feature: feature,
+          totalVotes: totalVotes,
+        },
+      };
+
+      res.status(200).json(featureWithVotesData);
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).json({ message: "Internal Server Error" });
+    });
+};
 export const featuresController = {
   createFeature,
   getAllFeatures,
+  getAllFeaturesForHome,
   editFeature,
   getFeatureById,
   deleteFeature,
@@ -406,8 +500,10 @@ export const featuresController = {
   addComment,
   getAllComments,
   editComment,
+  deleteComment,
   getAllVoters,
   getTotalVotesCount,
   getTotalCommentsCount,
   updateStatus,
+  getFeatureWithVotes
 };

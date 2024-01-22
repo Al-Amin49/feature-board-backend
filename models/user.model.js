@@ -26,6 +26,10 @@ const userSchema = new mongoose.Schema(
       enum: ["admin", "user"],
       default: "user",
     },
+    profile:{
+      type:String,
+      default:"https://randomuser.me/api/portraits/men/6.jpg"
+    }
   },
   { timestamps: true }
 );
@@ -73,5 +77,20 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
     return false;
   }
 };
+
+
+// Update user profile
+userSchema.methods.updateProfile = async function (newUsername, newEmail) {
+  this.username = newUsername || this.username;
+  this.email = newEmail || this.email;
+  await this.save();
+};
+
+// Change user password
+userSchema.methods.changePassword = async function (newPassword) {
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(newPassword, salt);
+  await this.save();
+}
 
 export const User = mongoose.model("User", userSchema);

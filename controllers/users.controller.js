@@ -107,6 +107,11 @@ const deleteUser = asyncWrapper(async (req, res) => {
   res.status(200).json({ message: "user successfully deleted" });
 });
 
+/*-------------------
+ @desc    makeAdmin
+ @route   Put api/v1/users//makeAdmin/:id
+ @access  Private
+*/
 const makeAdmin = asyncWrapper(async (req, res) => {
   const { id } = req.params;
 
@@ -125,6 +130,44 @@ const makeAdmin = asyncWrapper(async (req, res) => {
   res.status(200).json({ message: "User role updated to admin", user: updatedUser });
 });
 
+/*-------------------
+ @desc    update Profile
+ @route   Put api/v1/users/update-profile
+ @access  Private
+*/
+const updateProfile = asyncWrapper(async (req, res) => {
+  const { newUsername, newEmail } = req.body;
+  const user = req.user;
+
+  // If no user is found
+  if (!user) {
+    return res.status(404).json({ message: 'User not found' });
+  }
+
+  // Update user profile
+  await user.updateProfile(newUsername, newEmail);
+
+  res.status(200).json({ message: "User profile updated successfully", user });
+});
+/*-------------------
+ @desc    update Profile
+ @route   Put api/v1/users/change-password
+ @access  Private
+*/
+const changePassword = asyncWrapper(async (req, res) => {
+  const { newPassword } = req.body;
+  const user = req.user;
+
+  // If no user is found
+  if (!user) {
+    return res.status(404).json({ message: 'User not found' });
+  }
+
+  // Change user password
+  await user.changePassword(newPassword);
+
+  res.status(200).json({ message: "User password changed successfully", user });
+});
 
 export const usersController = {
   register,
@@ -132,5 +175,7 @@ export const usersController = {
   userDetails,
   getAllUsers,
   deleteUser,
-  makeAdmin
+  makeAdmin,
+  updateProfile,
+  changePassword
 };
